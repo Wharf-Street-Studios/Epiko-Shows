@@ -269,11 +269,23 @@ const App = () => {
 
   const EditProfileScreen = () => {
     const [formData, setFormData] = useState({ name: user.name, email: user.email, phone: user.phone });
+    const [avatarPreview, setAvatarPreview] = useState(user.avatar);
 
     const handleSave = () => {
-      setUser({ ...user, ...formData });
+      setUser({ ...user, ...formData, avatar: avatarPreview });
       navigate('profile');
       showToast('Profile updated successfully');
+    };
+
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatarPreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     return (
@@ -281,6 +293,17 @@ const App = () => {
         <div className="flex items-center gap-4 mb-8">
           <button onClick={() => navigate('profile')} className="text-white bg-gray-900 p-2 rounded-full hover:bg-gray-800"><ChevronLeft className="w-5 h-5" /></button>
           <h2 className="text-white font-bold text-xl">Edit Profile</h2>
+        </div>
+        <div className="flex justify-center mb-8">
+            <div className="relative">
+                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-800">
+                    <img src={avatarPreview} alt="Profile" className="w-full h-full object-cover" />
+                </div>
+                <label className="absolute bottom-0 right-0 bg-red-600 text-white p-2 rounded-full cursor-pointer hover:bg-red-500 border-4 border-gray-950">
+                    <Edit2 className="w-4 h-4" />
+                    <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+                </label>
+            </div>
         </div>
         <div className="space-y-6">
             <div className="space-y-2">
@@ -351,24 +374,97 @@ const App = () => {
 
   // --- MAIN SCREENS ---
 
-  const LoginScreen = () => (
+  const LoginScreen = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleLogin = () => {
+        if(!email || !password) { showToast("Please enter email and password", "error"); return; }
+        loginUser();
+    };
+
+    return (
     <div className="flex flex-col items-center justify-center h-full px-6 bg-gray-950 text-white relative overflow-hidden">
       <div className="absolute top-[-10%] left-[-10%] w-64 h-64 bg-red-600/20 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-64 h-64 bg-blue-600/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="mb-12 text-center z-10">
+      <div className="mb-8 text-center z-10">
         <div className="w-20 h-20 bg-gradient-to-br from-red-600 to-red-800 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-red-900/50 rotate-3 border border-white/10"><Ticket className="w-10 h-10 text-white" /></div>
         <h1 className="text-4xl font-black text-white tracking-tighter mb-2">EPIKO SHOWS</h1>
         <p className="text-gray-400 tracking-widest text-xs uppercase font-semibold">Cinematic Experience</p>
       </div>
       <div className="w-full space-y-4 z-10">
-        <button onClick={loginUser} className="w-full py-4 bg-white text-black font-bold rounded-xl hover:bg-gray-100 transition flex items-center justify-center gap-3 active:scale-95 transform duration-100 shadow-lg">
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6" alt="G" /> Continue with Google
-        </button>
-        <button onClick={loginUser} className="w-full py-4 bg-gray-800/80 backdrop-blur-sm text-white font-semibold rounded-xl border border-gray-700 hover:bg-gray-800 transition active:scale-95">Use Email Address</button>
+        <div className="space-y-3">
+            <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-white outline-none focus:border-red-500 transition-colors" />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-white outline-none focus:border-red-500 transition-colors" />
+            <div className="flex justify-end"><button onClick={() => navigate('forgot-password')} className="text-xs text-gray-500 hover:text-white transition-colors">Forgot Password?</button></div>
+        </div>
+        <button onClick={handleLogin} className="w-full py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-500 transition shadow-lg shadow-red-900/20">Login</button>
+        
+        <div className="relative py-2"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-800"></div></div><div className="relative flex justify-center text-xs"><span className="bg-gray-950 px-2 text-gray-500">Or continue with</span></div></div>
+        
+        <div className="grid grid-cols-2 gap-3">
+            <button onClick={loginUser} className="py-3 bg-gray-900 border border-gray-800 rounded-xl hover:bg-gray-800 transition flex items-center justify-center gap-2"><img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="G" /><span className="text-sm font-bold">Google</span></button>
+            <button onClick={loginUser} className="py-3 bg-gray-900 border border-gray-800 rounded-xl hover:bg-gray-800 transition flex items-center justify-center gap-2"><svg className="w-5 h-5 fill-white" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.74 1.18 0 2.45-1.62 4.37-1.54 1.85.08 3.2.76 4.08 1.97-3.61 1.92-3 6.45.54 7.78-.62 1.62-1.59 3.31-3.08 4.02zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"></path></svg><span className="text-sm font-bold">Apple</span></button>
+        </div>
       </div>
-      <p className="mt-12 text-xs text-gray-600 text-center px-8">By continuing, you agree to our Terms of Service & Privacy Policy.</p>
+      <p className="mt-8 text-sm text-gray-500">Don't have an account? <button onClick={() => navigate('signup')} className="text-red-500 font-bold hover:underline">Sign Up</button></p>
     </div>
-  );
+    );
+  };
+
+  const SignupScreen = () => {
+      const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+      const handleSignup = () => {
+          if(!formData.name || !formData.email || !formData.password) { showToast("Please fill all fields", "error"); return; }
+          if(formData.password !== formData.confirmPassword) { showToast("Passwords do not match", "error"); return; }
+          showToast("Account created successfully!");
+          loginUser();
+      };
+      return (
+        <div className="flex flex-col items-center justify-center h-full px-6 bg-gray-950 text-white relative overflow-hidden">
+            <div className="w-full max-w-sm z-10">
+                <h2 className="text-3xl font-black text-white mb-8 text-center">Create Account</h2>
+                <div className="space-y-3 mb-6">
+                    <input type="text" placeholder="Full Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-white outline-none focus:border-red-500 transition-colors" />
+                    <input type="email" placeholder="Email Address" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-white outline-none focus:border-red-500 transition-colors" />
+                    <input type="password" placeholder="Password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-white outline-none focus:border-red-500 transition-colors" />
+                    <input type="password" placeholder="Confirm Password" value={formData.confirmPassword} onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} className="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-white outline-none focus:border-red-500 transition-colors" />
+                </div>
+                <button onClick={handleSignup} className="w-full py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-500 transition shadow-lg shadow-red-900/20 mb-6">Sign Up</button>
+                
+                <div className="relative py-2 mb-6"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-800"></div></div><div className="relative flex justify-center text-xs"><span className="bg-gray-950 px-2 text-gray-500">Or continue with</span></div></div>
+                <div className="grid grid-cols-2 gap-3 mb-8">
+                    <button onClick={loginUser} className="py-3 bg-gray-900 border border-gray-800 rounded-xl hover:bg-gray-800 transition flex items-center justify-center gap-2"><img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="G" /><span className="text-sm font-bold">Google</span></button>
+                    <button onClick={loginUser} className="py-3 bg-gray-900 border border-gray-800 rounded-xl hover:bg-gray-800 transition flex items-center justify-center gap-2"><svg className="w-5 h-5 fill-white" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.74 1.18 0 2.45-1.62 4.37-1.54 1.85.08 3.2.76 4.08 1.97-3.61 1.92-3 6.45.54 7.78-.62 1.62-1.59 3.31-3.08 4.02zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"></path></svg><span className="text-sm font-bold">Apple</span></button>
+                </div>
+
+                <p className="text-center text-sm text-gray-500">Already have an account? <button onClick={() => navigate('login')} className="text-red-500 font-bold hover:underline">Login</button></p>
+            </div>
+        </div>
+      );
+  };
+
+  const ForgotPasswordScreen = () => {
+      const [email, setEmail] = useState('');
+      const handleReset = () => {
+          if(!email) { showToast("Please enter your email", "error"); return; }
+          showToast("Reset link sent to your email");
+          navigate('login');
+      };
+      return (
+        <div className="flex flex-col items-center justify-center h-full px-6 bg-gray-950 text-white relative overflow-hidden">
+            <div className="w-full max-w-sm z-10">
+                <button onClick={() => navigate('login')} className="mb-8 text-gray-500 hover:text-white flex items-center gap-2"><ChevronLeft className="w-5 h-5" /> Back to Login</button>
+                <h2 className="text-3xl font-black text-white mb-2">Forgot Password?</h2>
+                <p className="text-gray-500 mb-8 text-sm">Enter your email address and we'll send you a link to reset your password.</p>
+                <div className="space-y-4 mb-6">
+                    <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-white outline-none focus:border-red-500 transition-colors" />
+                </div>
+                <button onClick={handleReset} className="w-full py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-500 transition shadow-lg shadow-red-900/20">Send Reset Link</button>
+            </div>
+        </div>
+      );
+  };
 
   const HomeScreen = () => {
     const [filter, setFilter] = useState('Now Showing');
@@ -765,11 +861,11 @@ const App = () => {
 
   const ProfileScreen = () => (
       <div className="min-h-full bg-gray-950 p-6 flex flex-col">
-          <div className="flex justify-between items-center mb-8"><h2 className="text-white font-black text-2xl">Profile</h2><button className="text-gray-500 hover:text-white"><Settings className="w-6 h-6" /></button></div>
+          <div className="flex justify-between items-center mb-8"><h2 className="text-white font-black text-2xl">Profile</h2><button onClick={() => navigate('profile-settings')} className="text-gray-500 hover:text-white"><Settings className="w-6 h-6" /></button></div>
           <div className="flex items-center gap-4 mb-8"><div className="w-20 h-20 rounded-full bg-gray-800 p-1 border-2 border-red-600 relative"><img src={user.avatar} className="w-full h-full rounded-full object-cover" alt="avatar" /><div onClick={() => navigate('profile-edit')} className="absolute bottom-0 right-0 bg-red-600 text-white p-1 rounded-full border-2 border-gray-950 cursor-pointer hover:bg-red-500"><Edit2 className="w-3 h-3" /></div></div><div><h3 className="text-white font-bold text-xl">{user.name}</h3><p className="text-gray-500 text-sm">{user.email}</p><p className="text-red-500 text-xs font-bold mt-1">{user.phone}</p></div></div>
           <div className="space-y-4">
             <div onClick={() => navigate('profile-royalty')} className="bg-gray-900 p-4 rounded-2xl flex items-center justify-between border border-gray-800 hover:border-gray-700 transition cursor-pointer group"><div className="flex items-center gap-3"><div className="bg-yellow-900/20 p-2 rounded-full text-yellow-500 group-hover:scale-110 transition-transform"><Trophy className="w-5 h-5" /></div><div><p className="text-white font-bold">Epiko Royalty</p><p className="text-gray-500 text-xs">{loyaltyPoints} Points Available</p></div></div><ChevronLeft className="rotate-180 text-gray-600 w-4 h-4 group-hover:text-white group-hover:translate-x-1 transition-all" /></div>
-            <div onClick={() => navigate('profile-notifications')} className="bg-gray-900 p-4 rounded-2xl flex items-center justify-between border border-gray-800 hover:border-gray-700 transition cursor-pointer group"><div className="flex items-center gap-3"><div className="bg-blue-900/20 p-2 rounded-full text-blue-500 group-hover:scale-110 transition-transform"><Bell className="w-5 h-5" /></div><div><p className="text-white font-bold">Notifications</p><p className="text-gray-500 text-xs">Manage preferences</p></div></div><div className="w-10 h-5 bg-gray-700 rounded-full relative cursor-pointer"><div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div></div></div>
+            <div onClick={() => navigate('profile-notifications')} className="bg-gray-900 p-4 rounded-2xl flex items-center justify-between border border-gray-800 hover:border-gray-700 transition cursor-pointer group"><div className="flex items-center gap-3"><div className="bg-blue-900/20 p-2 rounded-full text-blue-500 group-hover:scale-110 transition-transform"><Bell className="w-5 h-5" /></div><div><p className="text-white font-bold">Notifications</p><p className="text-gray-500 text-xs">Manage preferences</p></div></div><ChevronLeft className="rotate-180 text-gray-600 w-4 h-4 group-hover:text-white group-hover:translate-x-1 transition-all" /></div>
             <div onClick={() => navigate('profile-vouchers')} className="bg-gray-900 p-4 rounded-2xl flex items-center justify-between border border-gray-800 hover:border-gray-700 transition cursor-pointer group"><div className="flex items-center gap-3"><div className="bg-purple-900/20 p-2 rounded-full text-purple-500 group-hover:scale-110 transition-transform"><Ticket className="w-5 h-5" /></div><div><p className="text-white font-bold">Passes & Vouchers</p><p className="text-gray-500 text-xs">2 Active</p></div></div><ChevronLeft className="rotate-180 text-gray-600 w-4 h-4 group-hover:text-white group-hover:translate-x-1 transition-all" /></div>
             <div onClick={() => navigate('profile-help')} className="bg-gray-900 p-4 rounded-2xl flex items-center justify-between border border-gray-800 hover:border-gray-700 transition cursor-pointer group"><div className="flex items-center gap-3"><div className="bg-green-900/20 p-2 rounded-full text-green-500 group-hover:scale-110 transition-transform"><HelpCircle className="w-5 h-5" /></div><div><p className="text-white font-bold">Help & Support</p><p className="text-gray-500 text-xs">FAQs, Chat with us</p></div></div><ChevronLeft className="rotate-180 text-gray-600 w-4 h-4 group-hover:text-white group-hover:translate-x-1 transition-all" /></div>
           </div>
@@ -784,6 +880,8 @@ const App = () => {
       {notification && (<div className={`absolute top-4 left-4 right-4 z-50 p-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-5 duration-300 border ${notification.type === 'error' ? 'bg-red-900/90 border-red-500 text-white' : 'bg-green-900/90 border-green-500 text-white'}`}>{notification.type === 'error' ? <CheckCircle className="w-5 h-5 text-red-400 rotate-45" /> : <CheckCircle className="w-5 h-5 text-green-400" />}<span className="font-bold text-sm">{notification.msg}</span></div>)}
       <div ref={screenRef} className="h-[calc(100dvh-65px)] bg-gray-950 overflow-y-auto no-scrollbar scroll-smooth">
         {currentScreen === 'login' && <LoginScreen />}
+        {currentScreen === 'signup' && <SignupScreen />}
+        {currentScreen === 'forgot-password' && <ForgotPasswordScreen />}
         {currentScreen === 'home' && <HomeScreen />}
         {currentScreen === 'see-all-movies' && <SeeAllMoviesScreen filter="All" />}
         {currentScreen === 'movie-details' && <MovieDetailsScreen />}
@@ -797,14 +895,79 @@ const App = () => {
         
         {currentScreen === 'profile-edit' && <EditProfileScreen />}
         {currentScreen === 'profile-royalty' && <RoyaltyScreen />}
-        {currentScreen === 'profile-notifications' && <div className="min-h-full bg-gray-950 flex flex-col p-6"><div className="flex items-center gap-4 mb-8"><button onClick={() => navigate('profile')} className="text-white bg-gray-900 p-2 rounded-full hover:bg-gray-800"><ChevronLeft className="w-5 h-5" /></button><h2 className="text-white font-bold text-xl">Notifications</h2></div><div className="text-gray-500 text-center mt-20">No new notifications</div></div>}
+        {currentScreen === 'profile-settings' && (
+            <div className="min-h-full bg-gray-950 flex flex-col p-6">
+                <div className="flex items-center gap-4 mb-8">
+                    <button onClick={() => navigate('profile')} className="text-white bg-gray-900 p-2 rounded-full hover:bg-gray-800"><ChevronLeft className="w-5 h-5" /></button>
+                    <h2 className="text-white font-bold text-xl">Settings</h2>
+                </div>
+                <div className="space-y-4">
+                    <div className="bg-gray-900 p-4 rounded-xl flex justify-between items-center border border-gray-800">
+                        <span className="text-white font-medium">App Version</span>
+                        <span className="text-gray-500 text-sm">v3.0.1</span>
+                    </div>
+                    <div className="bg-gray-900 p-4 rounded-xl flex justify-between items-center border border-gray-800">
+                        <span className="text-white font-medium">Terms of Service</span>
+                        <ChevronRight className="text-gray-500 w-4 h-4" />
+                    </div>
+                    <div className="bg-gray-900 p-4 rounded-xl flex justify-between items-center border border-gray-800">
+                        <span className="text-white font-medium">Privacy Policy</span>
+                        <ChevronRight className="text-gray-500 w-4 h-4" />
+                    </div>
+                </div>
+            </div>
+        )}
+        {currentScreen === 'profile-notifications' && (
+            <div className="min-h-full bg-gray-950 flex flex-col p-6">
+                <div className="flex items-center gap-4 mb-8">
+                    <button onClick={() => navigate('profile')} className="text-white bg-gray-900 p-2 rounded-full hover:bg-gray-800"><ChevronLeft className="w-5 h-5" /></button>
+                    <h2 className="text-white font-bold text-xl">Notifications</h2>
+                </div>
+                <div className="space-y-4">
+                    {['Booking Confirmations', 'New Movie Releases', 'Exclusive Offers', 'Ticket Reminders'].map((item, i) => (
+                        <div key={i} className="bg-gray-900 p-4 rounded-xl flex justify-between items-center border border-gray-800">
+                            <span className="text-white font-medium">{item}</span>
+                            <div className="w-12 h-6 bg-red-600 rounded-full relative cursor-pointer transition-colors hover:bg-red-500">
+                                <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )}
         {currentScreen === 'profile-vouchers' && <VouchersScreen />}
-        {currentScreen === 'profile-help' && <div className="min-h-full bg-gray-950 flex flex-col p-6"><div className="flex items-center gap-4 mb-8"><button onClick={() => navigate('profile')} className="text-white bg-gray-900 p-2 rounded-full hover:bg-gray-800"><ChevronLeft className="w-5 h-5" /></button><h2 className="text-white font-bold text-xl">Help & Support</h2></div><div className="space-y-4">{["How do I cancel my ticket?", "Where can I find my refund status?", "Can I change my seat after booking?"].map((q, i) => (<div key={i} className="bg-gray-900 p-4 rounded-xl text-white border border-gray-800">{q}</div>))}</div></div>}
+        {currentScreen === 'profile-help' && (
+            <div className="min-h-full bg-gray-950 flex flex-col p-6">
+                <div className="flex items-center gap-4 mb-8">
+                    <button onClick={() => navigate('profile')} className="text-white bg-gray-900 p-2 rounded-full hover:bg-gray-800"><ChevronLeft className="w-5 h-5" /></button>
+                    <h2 className="text-white font-bold text-xl">Help & Support</h2>
+                </div>
+                <div className="space-y-4">
+                    {[
+                        { q: "How do I cancel my ticket?", a: "You can cancel your ticket up to 2 hours before the showtime from the 'Bookings' tab. A cancellation fee may apply." },
+                        { q: "Where can I find my refund status?", a: "Refunds are processed within 5-7 business days. You can check the status in your bank statement or wallet transaction history." },
+                        { q: "Can I change my seat after booking?", a: "Currently, seat changes are not supported after booking. You would need to cancel and re-book." },
+                        { q: "What is Epiko Royalty?", a: "Epiko Royalty is our loyalty program where you earn points for every booking. Points can be redeemed for rewards like free popcorn or vouchers." }
+                    ].map((item, i) => (
+                        <details key={i} className="bg-gray-900 rounded-xl border border-gray-800 group">
+                            <summary className="p-4 font-medium text-white cursor-pointer list-none flex justify-between items-center">
+                                {item.q}
+                                <ChevronRight className="w-4 h-4 text-gray-500 transition-transform group-open:rotate-90" />
+                            </summary>
+                            <div className="px-4 pb-4 text-gray-400 text-sm leading-relaxed border-t border-gray-800/50 pt-2">
+                                {item.a}
+                            </div>
+                        </details>
+                    ))}
+                </div>
+                <button className="mt-auto w-full bg-gray-800 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-700 transition"><MessageCircle className="w-5 h-5" /> Chat with Support</button>
+            </div>
+        )}
       </div>
       {user && ['home', 'bookings', 'wallet', 'profile'].includes(currentScreen) && (
         <div className="absolute bottom-0 w-full h-[65px] bg-black/90 backdrop-blur-lg border-t border-gray-800 flex justify-around items-center px-2 z-30">
           {[{ id: 'home', icon: Home, label: 'Home' }, { id: 'bookings', icon: Ticket, label: 'Bookings' }, { id: 'wallet', icon: Wallet, label: 'Wallet' }, { id: 'profile', icon: User, label: 'Profile' }].map(tab => (
-            <button key={tab.id} onClick={() => navigate(tab.id)} className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 w-16 ${currentScreen === tab.id ? 'text-red-500 translate-y-[-2px]' : 'text-gray-500 hover:text-gray-300'}`}><tab.icon className={`w-6 h-6 ${currentScreen === tab.id ? 'fill-current' : ''}`} /><span className="text-[10px] font-bold tracking-wide">{tab.label}</span></button>
+            <button key={tab.id} onClick={() => navigate(tab.id)} className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 w-16 ${currentScreen === tab.id ? 'text-red-500 translate-y-[-2px]' : 'text-gray-500 hover:text-gray-300'}`}><tab.icon className={`w-6 h-6 ${currentScreen === tab.id ? 'stroke-[2.5]' : ''}`} /><span className="text-[10px] font-bold tracking-wide">{tab.label}</span></button>
           ))}
         </div>
       )}
