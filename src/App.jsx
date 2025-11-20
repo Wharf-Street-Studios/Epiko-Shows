@@ -29,7 +29,9 @@ import {
   Tag,
   MessageCircle,
   ChevronRight,
-  Grid
+  Grid,
+  ArrowDownLeft,
+  ArrowUpRight
 } from 'lucide-react';
 
 /**
@@ -818,11 +820,12 @@ const App = () => {
                 <div className="flex gap-2 mb-4"><div className="relative flex-1"><span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span><input type="number" min="1" value={amountToAdd} onChange={(e) => setAmountToAdd(e.target.value)} placeholder="Enter amount" className="w-full bg-gray-900 border border-gray-700 rounded-xl py-3 pl-8 pr-4 text-white font-bold focus:border-red-500 outline-none transition-colors" /></div><button onClick={handleAddFunds} disabled={!amountToAdd} className="bg-white text-black px-6 rounded-xl font-bold hover:bg-gray-200 disabled:opacity-50 transition-colors">Add</button></div>
                 <div className="flex gap-2 mb-8 overflow-x-auto no-scrollbar">{quickAdd.map(amt => (<button key={amt} onClick={() => setAmountToAdd(amt.toString())} className="px-4 py-2 bg-gray-900 border border-gray-800 rounded-lg text-gray-400 text-xs font-bold hover:bg-gray-800 hover:text-white transition-colors whitespace-nowrap">+ ₹{amt}</button>))}</div>
                 <h4 className="text-white font-bold mb-4 flex items-center gap-2"><History className="w-4 h-4 text-gray-500" /> Recent Transactions</h4>
-                <div className="space-y-3 pb-20">{transactions.map((t) => (<div key={t.id} className="flex justify-between items-center bg-gray-900/50 p-4 rounded-xl border border-gray-800/50"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-full flex items-center justify-center ${t.type === 'credit' ? 'bg-green-900/20 text-green-500' : 'bg-red-900/20 text-red-500'}`}>{t.type === 'credit' ? <Plus className="w-5 h-5" /> : <Minus className="w-5 h-5" />}</div><div><p className="text-white font-bold text-sm">{t.title}</p><p className="text-gray-500 text-[10px]">{t.date}</p></div></div><span className={`font-bold text-sm ${t.type === 'credit' ? 'text-green-500' : 'text-white'}`}>{t.amount > 0 ? '+' : ''}{t.amount}</span></div>))}</div>
-            </div>
-        </div>
-    );
-  };
+              <div className="space-y-3 pb-20">{transactions.map((t) => (<div key={t.id} className="flex justify-between items-center bg-gray-900/50 p-4 rounded-xl border border-gray-800/50"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-full flex items-center justify-center ${t.type === 'credit' ? 'bg-green-900/20 text-green-500' : 'bg-red-900/20 text-red-500'}`}>{t.type === 'credit' ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}</div><div><p className="text-white font-bold text-sm">{t.title}</p><p className="text-gray-500 text-[10px]">{t.date}</p></div></div><span className={`font-bold text-sm ${t.type === 'credit' ? 'text-green-500' : 'text-white'}`}>{t.amount > 0 ? '+' : ''}{t.amount}</span></div>))}</div>
+          </div>
+      </div>
+  );
+};
+
 
   const BookingsScreen = () => {
     const [tab, setTab] = useState('Upcoming');
